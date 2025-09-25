@@ -1,0 +1,118 @@
+version: "3.1"
+
+stories:
+  - story: Book tickets for Dinosaur Show
+    steps:
+      - intent: book_ticket
+      - action: utter_ask_ticket_type
+      - intent: choose_ticket_type
+        entities:
+          - ticket_type: "Dinosaur Show"
+      - slot_was_set:
+          - ticket_type: "Dinosaur Show"
+      - action: utter_ask_nationality
+      - intent: provide_nationality
+        entities:
+          - nationality: "Indian"
+      - slot_was_set:
+          - nationality: "Indian"
+      - action: utter_ask_adult_count
+      - intent: provide_tickets
+        entities:
+          - adult_count: "7"
+      - slot_was_set:
+          - adult_count: "7"
+      - action: utter_ask_children_count
+      - intent: provide_tickets
+        entities:
+          - children_count: "9"
+      - slot_was_set:
+          - children_count: "9"
+      - action: utter_thankyou
+
+  - story: Book tickets for Ice Age Show
+    steps:
+      - intent: book_ticket
+      - action: utter_ask_ticket_type
+      - intent: choose_ticket_type
+        entities:
+          - ticket_type: "Ice Age Show"
+      - slot_was_set:
+          - ticket_type: "Ice Age Show"
+      - action: utter_ask_nationality
+      - intent: provide_nationality
+        entities:
+          - nationality: "Foreigner"
+      - slot_was_set:
+          - nationality: "Foreigner"
+      - action: utter_ask_adult_count
+      - intent: provide_tickets
+        entities:
+          - adult_count: "5"
+      - slot_was_set:
+          - adult_count: "5"
+      - action: utter_ask_children_count
+      - intent: provide_tickets
+        entities:
+          - children_count: "3"
+      - slot_was_set:
+          - children_count: "3"
+      - action: utter_thankyou
+
+  - story: Book tickets for Ancient Statues
+    steps:
+      - intent: book_ticket
+      - action: utter_ask_ticket_type
+      - intent: choose_ticket_type
+        entities:
+          - ticket_type: "Ancient Statues"
+      - slot_was_set:
+          - ticket_type: "Ancient Statues"
+      - action: utter_ask_nationality
+      - intent: provide_nationality
+        entities:
+          - nationality: "Indian"
+      - slot_was_set:
+          - nationality: "Indian"
+      - action: utter_ask_adult_count
+      - intent: provide_tickets
+        entities:
+          - adult_count: "3"
+      - slot_was_set:
+          - adult_count: "3"
+      - action: utter_ask_children_count
+      - intent: provide_tickets
+        entities:
+          - children_count: "2"
+      - slot_was_set:
+          - children_count: "2"
+      - action: utter_thankyou
+
+  - story: Book tickets for Entry
+    steps:
+      - intent: book_ticket
+      - action: utter_ask_ticket_type
+      - intent: choose_ticket_type
+        entities:
+          - ticket_type: "entry"
+      - slot_was_set:
+          - ticket_type: "entry"
+      - action: utter_ask_nationality
+      - intent: provide_nationality
+        entities:
+          - nationality: "Foreigner"
+      - slot_was_set:
+          - nationality: "Foreigner"
+      - action: utter_ask_adult_count
+      - intent: provide_tickets
+        entities:
+          - adult_count: "7"
+      - slot_was_set:
+          - adult_count: "7"
+      - action: utter_ask_children_count
+      - intent: provide_tickets
+        entities:
+          - children_count: "9"
+      - slot_was_set:
+          - children_count: "9"
+      - action: utter_thankyou

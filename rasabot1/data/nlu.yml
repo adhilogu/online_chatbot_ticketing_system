@@ -1,0 +1,218 @@
+version: "3.1"
+nlu:
+- intent: greet
+  examples: |
+    - hello
+    - hi
+    - hey
+    - good morning
+    - good evening
+
+- intent: ask_services
+  examples: |
+    - What services do you provide?
+    - I need assistance
+    - What can you do?
+    - Show me the available services
+    - Tell me what services are available
+    - Can you help me with something?
+    - I want to know what you offer
+    - What are my options?
+
+- intent: book_ticket
+  examples: |
+    - I want tickets
+    - I want entry tickets
+    - I want to book
+    - I want to book tickets
+    - I need tickets
+    - I need [Dinosaur Show](ticket_type) tickets
+    - I need [entry](ticket_type) tickets
+    - Book tickets for me
+    - I want to book an [entry](ticket_type) ticket
+    - I want to book [Dinosaur Show](ticket_type) tickets
+    - I would like to book a [Ancient Statues](ticket_type) ticket
+    - Can I book [Ice Age Show](ticket_type) tickets?
+    - Book a [Dinosaur Show](ticket_type) ticket
+    - I need to book tickets for [entry](ticket_type)
+    - Help me book tickets
+    - I want to boom tickets
+    - I would like to book tickets for [Ice Age Show](ticket_type)
+    - Give me [entry](ticket_type)
+    - Can you book a ticket for me?
+    - I am looking to book a ticket
+    - I want to reserve tickets
+    - Can I reserve tickets for the [Dinosaur Show](ticket_type)?
+    - I'd like to purchase [entry](ticket_type) tickets
+    - I need to get tickets for [Ice Age Show](ticket_type)
+    - How can I book tickets for [Ancient Statues](ticket_type)?
+    - Could you help me book a ticket for [entry](ticket_type)?
+    - Let me book tickets for [Dinosaur Show](ticket_type)
+    - Please book [Ancient Statues](ticket_type) tickets for me
+    - I’d like to get tickets for the [Dinosaur Show](ticket_type)
+    - I want to buy [entry](ticket_type) tickets
+    - Book an [Ice Age Show](ticket_type) ticket for me
+    - Reserve [Ancient Statues](ticket_type) tickets
+    - I want tickets for [Ice Age Show](ticket_type)
+    - Could you help me reserve [Dinosaur Show](ticket_type) tickets?
+    - I am planning to book tickets for [entry](ticket_type)
+    - How do I get [Ancient Statues](ticket_type) tickets?
+    - I’d like [entry](ticket_type) tickets, please
+    - [Dinosaur Show](ticket_type) tickets, please
+    - Can I get tickets for [Ice Age Show](ticket_type)?
+    - Book a ticket for the [Ancient Statues](ticket_type) exhibit
+    - I need help booking tickets for the [entry](ticket_type)
+
+- intent: inquire_ticket_type
+  examples: |
+    - What types of tickets are available?
+    - What kind of tickets do you have?
+    - Show me the ticket options
+    - What are the ticket types?
+    - Tell me about ticket options
+    - Can I know the ticket types?
+    - Please list all ticket types
+    - What are the available ticket categories?
+    - Which tickets can I book?
+    - Can I see the ticket options?
+
+- intent: choose_ticket_type
+  examples: |
+    - [entry](ticket_type)
+    - [Dinosaur Show](ticket_type)
+    - [Ancient Statues](ticket_type)
+    - [Ice Age Show](ticket_type)
+    - I want an [entry](ticket_type) ticket
+    - Give me tickets for the [Dinosaur Show](ticket_type)
+    - Can I book tickets for [Ancient Statues](ticket_type)?
+    - Tickets for [Ice Age Show](ticket_type)
+    - Get me an [entry](ticket_type) ticket
+    - [Dinosaur Show](ticket_type)
+    - I need an [Ice Age Show](ticket_type) ticket
+    - Please book an [entry](ticket_type) ticket for me
+    - I need [Dinosaur Show](ticket_type) tickets, please
+    - I'd like to book [Ancient Statues](ticket_type) tickets
+    - Can you reserve [Ice Age Show](ticket_type) tickets for me?
+
+- intent: provide_nationality
+  examples: |
+    - [Indian](nationality)
+    - [foreigner](nationality)
+    - I am an [Indian](nationality)
+    - I am a [foreigner](nationality)
+    - [Indian](nationality)
+    - [foreigner](nationality)
+    - I am from [India](nationality)
+    - I am not from here; I am a [foreigner](nationality)
+    - My nationality is [Indian](nationality)
+    - I am not Indian; I am a [foreigner](nationality)
+    - I am [Indian](nationality), can I book?
+    - As a [foreigner](nationality), can I get a ticket?
+
+- intent: provide_tickets
+  examples: |
+    - I am [Indian](nationality),I need [5](adult_count) adult and [7](children_count) children tickets for [Dinosaur Show](ticket_type).
+    - I need [5](adult_count) adult and [7](children_count) children tickets for [Dinosaur Show](ticket_type).
+    - I need  [7](children_count) children and [5](adult_count) adult tickets for [Dinosaur Show](ticket_type).
+    - Book [4](adult_count) adults and [3](children_count) children for [Dinosaur Show](ticket_type).
+    - I want [2](adult_count) adults and [1](children_count) kid for [Ice Age Show](ticket_type).
+    - I need [4](adult_count) adults and [6](children_count) children tickets
+    - [2](adult_count) adults and [3](children_count) children
+    - [4](adult_count) adults
+    - [6](children_count) children
+    - I need [2](adult_count) adult tickets
+    - I need tickets for [3](children_count) children
+    - [1](adult_count) adult and [5](children_count) children
+    - Give me [2](adult_count) adult tickets and [3](children_count) children tickets
+    - I want tickets for [4](adult_count) adults and [2](children_count) children
+    - [3](adult_count) adults and [1](children_count) kid
+    - Just [5](children_count) kids' tickets
+    - Only [2](adult_count) adults
+    - I want to buy tickets for [5](children_count) kids
+    - Can I book for [3](adult_count) adults and [4](children_count) children?
+    - I'd like to reserve [2](adult_count) adults' and [3](children_count) kids' tickets
+
+- intent: inquire_services
+  examples: |
+    - What can you do for me?
+    - Tell me what services you provide
+    - I want to know the available services
+    - What kind of assistance can you provide?
+    - Can you help me with anything else?
+    - What else can you do?
+    - Do you have any other services?
+
+
+- intent: confirm_booking
+  examples: |
+    - Yes, please book
+    - Go ahead and book the tickets
+    - Yes, proceed with the booking
+    - That's fine, book it
+    - I confirm the booking
+    - Yes, I agree to book these tickets
+    - Book them now
+    - I am okay with this booking
+    - Please confirm the reservation
+    - Confirm my booking
+
+- intent: provide_tickets
+  examples: |
+    - I need [4](adult_count) adults and [6](children_count) children
+    - [2](adult_count) adults
+    - [3](children_count) kids
+    - I need [1](adult_count) adult and [5](children_count) children
+    - Give me [2](adult_count) adult tickets and [3](children_count) children tickets
+    - I want tickets for [2](adult_count) adults and [3](children_count) kids
+    - [4](adult_count) adults and [2](children_count) children, please
+    - [2](adult_count) adult tickets
+    - [3](children_count) children's tickets
+    - [3](children_count) children tickets
+    - I need [8](children_count) children's tickets
+    - [5](children_count)
+    - Tickets for [3](children_count) children
+    - [5](children_count) kids
+    - I want [4](children_count) kids' tickets
+    - Just [5](children_count) children
+    - [4] (adult_count) and [9] (children_count)
+    - [5] (adult_count)
+    - [6] (children_count)
+
+- intent: thankyou
+  examples: |
+    - thank you
+    - thanks
+    - that's all
+    - I appreciate it
+
+entity_synonyms:
+  entry:
+    - entry ticket
+    - regular ticket
+    - entry
+    - regular
+  Dinosaur Show:
+    - dinosaur show
+    - dino show
+    - dino
+
+  Ancient Statues:
+    - ancient statues
+    - old age
+    - ancient staues
+    - ancient
+  Ice Age Show:
+    - ice age show
+    - ice age
+    - ice show
+    - ice
+  kids:
+    - children
+    - kiddos
+    - kids
+  adults:
+    - grown-ups
+    - adults
+    - citizens
+    - youngsters
+    - adult

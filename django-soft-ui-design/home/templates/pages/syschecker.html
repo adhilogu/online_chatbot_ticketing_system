@@ -1,0 +1,171 @@
+{% extends 'layouts/base_sections.html' %}
+{% load static %}
+
+{% block title %}System Check{% endblock title %}
+{% block content %}
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    #intro-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #f9f9f9;
+      overflow: hidden;
+    }
+
+    #check-list {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 400px;
+    }
+
+    .check-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 15px;
+    }
+
+    .loading-circle {
+      width: 20px;
+      height: 20px;
+      border: 3px solid #007bff;
+      border-top: 3px solid transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    .result-icon {
+      width: 24px;
+      height: 24px;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes scrollUp {
+      from {
+        transform: translateY(0);
+      }
+      to {
+        transform: translateY(-100%);
+      }
+    }
+
+    .scroll-up {
+      animation: scrollUp 1s ease-in-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <div id="intro-page">
+    <h5 class="text-gradient text-primary clickable" style="font-weight: bold; cursor: pointer;">
+      Hi There! Sara here
+      <img src="https://em-content.zobj.net/thumbs/240/apple/325/smiling-face-with-smiling-eyes_1f60a.png" alt="😊" style="width: 1em; height: 1em; vertical-align: middle;">
+    </h5>
+    <div id="check-list"></div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const checkList = document.getElementById("check-list");
+      const introPage = document.getElementById("intro-page");
+
+      // Fetch system checks from the server
+      async function fetchSystemChecks() {
+        try {
+          const response = await fetch("/system_check/", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+          if (!response.ok) {
+            throw new Error("Failed to fetch system checks.");
+          }
+          const data = await response.json();
+          displayChecks(data);
+        } catch (error) {
+          console.error(error);
+          const errorMessage = document.createElement("div");
+          errorMessage.textContent = "Error fetching system checks. Please try again later.";
+          errorMessage.style.color = "red";
+          checkList.appendChild(errorMessage);
+        }
+      }
+
+      // Display the checks with loading animation and results
+      function displayChecks(data) {
+        const checks = data.checks;
+        let currentCheck = 0;
+
+        function performNextCheck() {
+          if (currentCheck < checks.length) {
+            const { check, result } = checks[currentCheck];
+            const checkItem = document.createElement("div");
+            checkItem.classList.add("check-item");
+
+            const checkText = document.createElement("span");
+            checkText.textContent = check;
+
+            const loadingCircle = document.createElement("div");
+            loadingCircle.classList.add("loading-circle");
+
+            checkItem.appendChild(checkText);
+            checkItem.appendChild(loadingCircle);
+            checkList.appendChild(checkItem);
+
+            setTimeout(() => {
+              loadingCircle.remove();
+              const resultIcon = document.createElement("img");
+
+              // Use PNG images for success and failure from em-content.zobj.net
+              resultIcon.src = result
+                ? "https://em-content.zobj.net/thumbs/240/apple/325/check-mark-button_2705.png" // Green tick mark
+                : "https://em-content.zobj.net/thumbs/240/apple/325/cross-mark_274c.png"; // Red X mark
+
+              resultIcon.alt = result ? "Success" : "Failure";
+              resultIcon.classList.add("result-icon");
+
+              checkItem.appendChild(resultIcon);
+
+              currentCheck++;
+              performNextCheck();
+            }, 1500);
+          } else {
+            finalizeChecks(data.all_checks_passed);
+          }
+        }
+
+        performNextCheck();
+      }
+
+      // Finalize the checks and handle navigation
+      function finalizeChecks(allChecksPassed) {
+        if (allChecksPassed) {
+          const successMessage = document.createElement("div");
+          checkList.appendChild(successMessage)
+          setTimeout(() => {
+            introPage.classList.add("scroll-up");
+            setTimeout(() => {
+              window.location.href = "/chat/";
+            }, 1000);
+          }, 1000);
+        } else {
+          const failureMessage = document.createElement("div");
+          failureMessage.textContent = "Some checks failed. Please try again.";
+          failureMessage.style.color = "red";
+          failureMessage.style.fontWeight = "bold";
+          checkList.appendChild(failureMessage);
+        }
+      }
+
+      fetchSystemChecks();
+    });
+  </script>
+</body>
+{% endblock content %}

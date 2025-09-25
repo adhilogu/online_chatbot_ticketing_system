@@ -1,0 +1,87 @@
+version: "3.1"
+intents:
+  - greet
+  - ask_services
+  - book_ticket
+  - choose_ticket_type
+  - provide_nationality
+  - provide_tickets
+  - thankyou
+
+entities:
+  - ticket_type
+  - nationality
+  - adult_count
+  - children_count
+  - age_type
+
+slots:
+  ticket_type:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: ticket_type
+  nationality:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: nationality
+  adult_count:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: adult_count
+  children_count:
+    type: text
+    mappings:
+      - type: from_entity
+        entity: children_count
+
+
+responses:
+  utter_greet:
+    - text: "Welcome to the National Museum, Ministry of Culture! How can I assist you today?"
+      custom:
+        reply_type: "greet"
+
+  utter_services:
+    - text: |
+        What kind of services do you want?
+        - Book Ticket
+        - My Previous Booking
+        - Navigation Assistance (Museum Map, restrooms, cafés, and exits)
+        - Event Information
+        - Historical Context
+        - Accessibility Features (Wheelchair/stroller rentals, Shuttle EV vehicles)
+        - Other Services (Food/Refreshments, Gift Shops, Photography/Artwork Purchase)
+        - Safety and First Aid
+        - Help Desk Contacts
+      custom:
+        reply_type: "ask_services"
+
+  utter_ask_ticket_type:
+    - text: "What kind of tickets do you want? Entry, Dinosaur Show, Ancient Statues, or Ice Age Show?"
+      custom:
+        reply_type: "ticket_type"
+
+  utter_ask_nationality:
+    - text: "Are you Indian or a Foreigner?"
+      custom:
+        reply_type: "nationality"
+
+  utter_ask_adult_count:
+    - text: "How many adult tickets do you need?"
+      custom:
+        reply_type: "adult_count"
+
+  utter_ask_children_count:
+    - text: "How many children's tickets do you need?"
+      custom:
+        reply_type: "children_count"
+
+  utter_thankyou:
+    - text: "Here are your {nationality} {adult_count} adult and {children_count} children tickets for {ticket_type}. Thank you!"
+      custom:
+        reply_type: "confirmation"
+
+

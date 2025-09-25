@@ -1,0 +1,426 @@
+{% extends 'layouts/base_sections.html' %}
+{% load static %}
+
+{% block title %} National Musuem {% endblock title %}
+
+{% block content %}
+{% include 'includes/navigation.html' %}
+<style>
+  .page-header {
+    position: relative;
+    width: 100%;
+    height: auto; /* Maintain responsive height */
+    max-height: 717px; /* Set maximum height */
+    overflow: hidden; /* Ensures the video doesn't overflow */
+  }
+
+  #bg-video {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%; /* Set width to 100% */
+    height: auto; /* Set height to auto to maintain aspect ratio */
+    min-width: 1920px; /* Set minimum width to 1920px */
+    min-height: 717px; /* Set minimum height to 717px */
+    object-fit: cover; /* This makes sure the video covers the container */
+    transform: translate(-50%, -50%); /* Center the video */
+    z-index: -1; /* Places the video behind the content */
+  }
+
+  h1, p {
+    color: white; /* Ensure text color contrasts against the video */
+  }
+
+  .product-card {
+    background-color: #e9ecef;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+.product-image-top .carousel-item img {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.product-title {
+    font-size: 1.25rem;
+}
+
+.product-price {
+    color: #28a745;
+}
+
+.product-bhk-location, .product-area {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.carousel-image {
+        height: 300px; /* Set a fixed height for the images */
+        object-fit: cover; /* Ensure the image covers the area while maintaining its aspect ratio */
+    }
+
+.equal-height {
+    height: 200px; /* Set your desired height */
+    object-fit: cover; /* Ensures the image covers the entire area without stretching */
+}
+</style>
+
+<header class="header-2">
+  <div class="page-header min-vh-75 relative">
+    <!-- Video Background -->
+    <video autoplay muted loop id="bg-video">
+      <source src="{% static 'video/bgvdo.mp4' %}" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-7 text-center mx-auto">
+          <h1 class="text-white pt-3 mt-n5">NATIONAL MUSUEM</h1>
+          <p class="lead text-white mt-3">Ministry of Culture</p>
+            <p class="lead text-white mt-3">
+                Hello, <strong>{{ request.user.username }}</strong>!
+            </p>
+
+          <!-- Contact Us Button /system_check/ -->
+          <a href="/system_check/" class="btn bg-gradient-primary btn-lg mt-3" style="margin-top: 10px; margin-bottom: 30px;">
+                BOOK TICKETS
+            </a>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="position-absolute w-100 z-index-1 bottom-0">
+      <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 40" preserveAspectRatio="none" shape-rendering="auto">
+        <defs>
+          <path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" />
+        </defs>
+        <g class="moving-waves">
+          <use xlink:href="#gentle-wave" x="48" y="-1" fill="rgba(255,255,255,0.40)" />
+          <use xlink:href="#gentle-wave" x="48" y="3" fill="rgba(255,255,255,0.35)" />
+          <use xlink:href="#gentle-wave" x="48" y="5" fill="rgba(255,255,255,0.25)" />
+          <use xlink:href="#gentle-wave" x="48" y="8" fill="rgba(255,255,255,0.20)" />
+          <use xlink:href="#gentle-wave" x="48" y="13" fill="rgba(255,255,255,0.15)" />
+          <use xlink:href="#gentle-wave" x="48" y="16" fill="rgba(255,255,255,0.95)" />
+        </g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+
+
+<section class="pt-3 pb-4" id="count-stats">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-9 z-index-2 border-radius-xl mt-n10 mx-auto py-3 blur shadow-blur">
+        <div class="row">
+          <div class="col-md-4 position-relative">
+            <div class="p-3 text-center">
+              <h1 class="text-gradient text-primary"><span id="state1" countTo="70">0</span>+</h1>
+              <h5 class="mt-3">Paintings</h5>
+
+            </div>
+            <hr class="vertical dark">
+          </div>
+          <div class="col-md-4 position-relative">
+            <div class="p-3 text-center">
+              <h1 class="text-gradient text-primary"> <span id="state2" countTo="15">0</span>+</h1>
+              <h5 class="mt-3">Shows</h5>
+
+            </div>
+            <hr class="vertical dark">
+          </div>
+          <div class="col-md-4">
+            <div class="p-3 text-center">
+              <h1 class="text-gradient text-primary" id="state3" countTo="4">0</h1>
+              <h5 class="mt-3">Eras</h5>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Services Cards Section -->
+<div class="row justify-content-center text-center my-sm-5">
+    <div class="col-lg-6">
+        <h2 class="text-dark mb-0"> </h2>
+        <h2 class="text-primary text-gradient"> </h2>
+    </div>
+</div>
+
+
+<!-- Elevate Your Living Experience -->
+<section class="py-5">
+  <div class="container">
+    <div class="row">
+      <div class="row text-center ">
+        <div class="col-lg-6 mx-auto">
+          <h2 class="text-primary text-gradient mb-0"> </h2>
+          <h2 class=""></h2>
+          <p class="lead"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <a href="#">
+                        <div class="card move-on-hover">
+                            <img class="w-100 equal-height" src="{% static 'images/abtusimg.png' %}" alt="">
+                        </div>
+                        <div class="mt-2 ms-2">
+                            <h6 class="mb-0">About Our Company</h6>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mt-md-0 mt-5">
+                    <a href="#">
+                        <div class="card move-on-hover">
+                            <img class="w-100 equal-height" src="{% static 'images/ser.webp' %}" alt="">
+                        </div>
+                        <div class="mt-2 ms-2">
+                            <h6 class="mb-0">Our Projects</h6>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mt-md-0 mt-6">
+                    <a href="#">
+                        <div class="card move-on-hover">
+                            <img class="w-100 equal-height" src="{% static 'images/servimg.png' %}" alt="">
+                        </div>
+                        <div class="mt-2 ms-2">
+                            <h6 class="mb-0">Explore Our Services</h6>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-6 mt-md-0 mt-6">
+                    <a href="#">
+                        <div class="card move-on-hover">
+                            <img class="w-100 equal-height" src="{% static 'images/propimg.webp' %}" alt="">
+                        </div>
+                        <div class="mt-2 ms-2">
+                            <h6 class="mb-0">Explore Properties</h6>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+</div>
+
+      <div class="col-md-3 mx-auto mt-md-0 mt-5">
+        <div class="position-sticky" style="top:100px !important">
+          <h4 class="">Explore Our Premium Properties, Land Sales, and Custom Builds</h4>
+          <h6 class="text-secondary">This is just a glimpse of the exceptional opportunities we offer. Focus on your future home, and let us handle the details.</h6>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- -------- START Content Presentation Docs ------- -->
+<div class="container mt-sm-5">
+  <div class="page-header min-vh-50 my-sm-3 mb-3 border-radius-xl" style="background-image: url('{% static 'images/recimg.webp' %}');">
+    <span class="mask bg-gradient-dark"></span>
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6 ms-lg-5">
+          <h4 class="text-white mb-0">Crafted with Care</h4>
+          <h1 class="text-white">Comprehensive Real Estate Solutions</h1>
+          <p class="lead text-white opacity-8">From land acquisition to bespoke home building, you will find all the information you need. Utilize our resources and create the home of your dreams.</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="row">
+    <div class="col-lg-4">
+      <div class="info-horizontal bg-gradient-primary border-radius-xl p-5">
+        <div class="icon">
+          <svg class="text-white" width="25px" height="25px" viewBox="0 0 46 43" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <title>delivery-fast</title>
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-2320.000000, -741.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                      <g transform="translate(1716.000000, 291.000000)">
+                          <g id="delivery-fast" transform="translate(604.000000, 450.000000)">
+                              <rect class="color-background" opacity="0.601143973" x="0" y="0" width="17.25" height="3.83333333"></rect>
+                              <rect class="color-background" opacity="0.601143973" x="3.83333333" y="7.66666667" width="13.4166667" height="3.83333333"></rect>
+                              <rect class="color-background" opacity="0.601143973" x="7.66666667" y="15.3333333" width="9.58333333" height="3.83333333"></rect>
+                              <rect class="color-background" opacity="0.601888021" x="11.5" y="23" width="5.75" height="3.83333333"></rect>
+                              <path class="color-foreground" d="M44.9400833,19.3679167 L38.0611667,15.9294167 L36.3591667,9.1195 C36.1464167,8.26466667 35.37975,7.66666667 34.5,7.66666667 L31.3854167,7.66666667 L21.0833333,7.66666667 C21.0833333,7.66666667 21.0833333,31.5310833 21.0833333,32.5833333 C21.0833333,33.6355833 21.1810833,34.5 21.1810833,34.5 C21.6640833,38.801 25.2808333,42.1666667 29.7083333,42.1666667 C34.1358333,42.1666667 37.7525833,38.801 38.2355833,34.5 L44.0833333,34.5 C45.1413333,34.5 46,33.6413333 46,32.5833333 L46,21.0833333 C46,20.3569167 45.5898333,19.69375 44.9400833,19.3679167 Z M29.7083333,38.3333333 C27.0671667,38.3333333 24.9166667,36.18475 24.9166667,33.5416667 C24.9166667,30.8985833 27.0671667,28.75 29.7083333,28.75 C32.3495,28.75 34.5,30.8985833 34.5,33.5416667 C34.5,36.18475 32.3495,38.3333333 29.7083333,38.3333333 Z M24.9166667,17.25 L24.9166667,11.5 L33.2426667,11.5 L34.5,17.25 L24.9166667,17.25 Z"></path>
+                          </g>
+                      </g>
+                  </g>
+              </g>
+          </svg>
+        </div>
+        <div class="description ps-5">
+          <h5 class="text-white">Swift Transactions</h5>
+          <p class="text-white opacity-8">We ensure that your buying or selling experience is seamless and efficient.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="info-horizontal bg-gradient-warning border-radius-xl p-5">
+        <div class="icon">
+          <svg class="text-white" width="25px" height="25px" viewBox="0 0 46 43" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <title>trending-up</title>
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-2320.000000, -741.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                      <g transform="translate(1716.000000, 291.000000)">
+                          <g id="trending-up" transform="translate(604.000000, 450.000000)">
+                              <path class="color-foreground" d="M43,5 L43,1 L1,1 L1,43 L5,43 L5,5 L43,5 Z M7,7 L7,39 L39,39 L39,7 L7,7 Z"></path>
+                              <path class="color-foreground" d="M35,21 L18,38 L11,31 L5,37 L18,50 L42,26 L35,21 Z"></path>
+                          </g>
+                      </g>
+                  </g>
+              </g>
+          </svg>
+        </div>
+        <div class="description ps-5">
+          <h5 class="text-white">Increased Value</h5>
+          <p class="text-white opacity-8">Investing in real estate ensures your assets consistently appreciate over time.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-4">
+      <div class="info-horizontal bg-gradient-info border-radius-xl p-5">
+        <div class="icon">
+          <svg class="text-white" width="25px" height="25px" viewBox="0 0 46 43" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+              <title>bank</title>
+              <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+                  <g transform="translate(-2320.000000, -741.000000)" fill="#FFFFFF" fill-rule="nonzero">
+                      <g transform="translate(1716.000000, 291.000000)">
+                          <g id="bank" transform="translate(604.000000, 450.000000)">
+                              <path class="color-foreground" d="M45,14.5 L23,1 L1,14.5 L5,14.5 L5,40 C5,41.1 5.9,42 7,42 L16,42 C17.1,42 18,41.1 18,40 L18,30 L28,30 L28,40 C28,41.1 28.9,42 30,42 L39,42 C40.1,42 41,41.1 41,40 L41,14.5 L45,14.5 Z M27,40 L27,30 L19,30 L19,40 L27,40 Z"></path>
+                          </g>
+                      </g>
+                  </g>
+              </g>
+          </svg>
+        </div>
+        <div class="description ps-5">
+          <h5 class="text-white">Trusted Partnerships</h5>
+          <p class="text-white opacity-8">Collaborate with us and benefit from our extensive network and expertise.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- -------- END Content Presentation Docs ------- -->
+
+
+
+{% endblock content %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+
+  if (document.getElementById('state1')) {
+    const countUp = new CountUp('state1', document.getElementById("state1").getAttribute("countTo"));
+    if (!countUp.error) {
+      countUp.start();
+    } else {
+      console.error(countUp.error);
+    }
+  }
+  if (document.getElementById('state2')) {
+    const countUp1 = new CountUp('state2', document.getElementById("state2").getAttribute("countTo"));
+    if (!countUp1.error) {
+      countUp1.start();
+    } else {
+      console.error(countUp1.error);
+    }
+  }
+  if (document.getElementById('state3')) {
+    const countUp2 = new CountUp('state3', document.getElementById("state3").getAttribute("countTo"));
+    if (!countUp2.error) {
+      countUp2.start();
+    } else {
+      console.error(countUp2.error);
+    };
+  }
+
+
+
+
+
+  const toggleButton = document.getElementById('toggle-button');
+const cardContainer = document.getElementById('card-container');
+const cardItems = document.querySelectorAll('#card-container .card-item'); // Scope the selection to service cards only
+
+// Set how many cards to show initially
+const maxVisibleCards = 3; // Adjust this number based on your layout
+const totalCards = cardItems.length; // Total number of cards
+
+// Initially hide excess cards
+cardItems.forEach((card, index) => {
+    if (index >= maxVisibleCards) {
+        card.style.display = 'none'; // Hide excess cards
+    }
+});
+
+toggleButton.addEventListener('click', () => {
+    const isExpanded = toggleButton.textContent.includes('Show Less');
+    if (isExpanded) {
+        // Collapse to show only the initially visible cards
+        cardItems.forEach((card, index) => {
+            if (index >= maxVisibleCards) {
+                card.style.display = 'none'; // Hide cards again
+            }
+        });
+        toggleButton.textContent = 'Show More Services'; // Change button text
+    } else {
+        // Expand to show all cards
+        cardItems.forEach(card => {
+            card.style.display = 'block'; // Show all cards
+        });
+        toggleButton.textContent = 'Show Less Services'; // Change button text
+    }
+
+    // Scroll to the cards section
+    cardContainer.scrollIntoView({ behavior: 'smooth' });
+});
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+    const carousels = document.querySelectorAll('.carousel');
+
+    carousels.forEach(carousel => {
+        let interval = setInterval(() => {
+            const nextButton = carousel.querySelector('.carousel-control-next');
+            if (nextButton) {
+                nextButton.click();
+            }
+        }, 3000); // Change every 3 seconds
+
+        // Optional: Pause on hover
+        carousel.addEventListener('mouseenter', () => clearInterval(interval));
+        carousel.addEventListener('mouseleave', () => {
+            interval = setInterval(() => {
+                const nextButton = carousel.querySelector('.carousel-control-next');
+                if (nextButton) {
+                    nextButton.click();
+                }
+            }, 3000);
+        });
+    });
+});
+</script>
+{% include 'includes/footer_background.html' %}
+{% endblock javascripts %}

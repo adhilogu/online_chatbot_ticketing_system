@@ -1,0 +1,44 @@
+[
+  {
+    "tag_name": "entity",
+    "ids_to_tags": {
+      "1": "B-adult_count",
+      "2": "I-adult_count",
+      "3": "L-adult_count",
+      "4": "U-adult_count",
+      "5": "B-children_count",
+      "6": "I-children_count",
+      "7": "L-children_count",
+      "8": "U-children_count",
+      "9": "B-nationality",
+      "10": "I-nationality",
+      "11": "L-nationality",
+      "12": "U-nationality",
+      "13": "B-ticket_type",
+      "14": "I-ticket_type",
+      "15": "L-ticket_type",
+      "16": "U-ticket_type",
+      "0": "O"
+    },
+    "tags_to_ids": {
+      "B-adult_count": 1,
+      "I-adult_count": 2,
+      "L-adult_count": 3,
+      "U-adult_count": 4,
+      "B-children_count": 5,
+      "I-children_count": 6,
+      "L-children_count": 7,
+      "U-children_count": 8,
+      "B-nationality": 9,
+      "I-nationality": 10,
+      "L-nationality": 11,
+      "U-nationality": 12,
+      "B-ticket_type": 13,
+      "I-ticket_type": 14,
+      "L-ticket_type": 15,
+      "U-ticket_type": 16,
+      "O": 0
+    },
+    "num_tags": 17
+  }
+]

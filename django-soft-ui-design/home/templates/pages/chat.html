@@ -1,0 +1,1344 @@
+{% extends 'layouts/base_sections.html' %}
+{% load static %}
+
+{% block title %} Museum Chat-Bot {% endblock title %}
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <!-- Disable user zoom -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+
+{% block content %}
+<!-- Include jsPDF and html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet"/>
+
+<!-- Outer Container to handle the red sides and centering -->
+<div class="full-screen-wrapper">
+    <div class="centered-container">
+        <section class="responsive-section" style=" margin-top: -40px; ">
+            <div class="container mt-sm-5" style="background-image: url('{% static 'images/chatbg.png' %}'); background-size: cover; background-position: center;">
+                <br>
+                <div class="page-header min-vh-15 my-sm-3 mb-3 border-radius-xl" style="background-color: #5a4029;">
+                    <div class="container">
+                        <div class="row">
+                            <!-- First Row with Profile Image, Greeting, Back Button and More Button -->
+                            <div class="col-12 d-flex justify-content-between align-items-center mb-3" style="padding-top: 8px; padding-bottom: 8px;">
+                                <!-- Back Button (Left) -->
+                                <div class="d-flex align-items-center me-3">
+                                    <a href="javascript:void(0);" id="back-button" class="text-warning me-3" onclick="window.location.href='/'">
+                                        <i class="fas fa-arrow-left" style="font-size: 1.3rem; color: #ffc823;"></i> <!-- Yellow color for the arrow -->
+                                    </a>
+                                </div>
+
+                                <!-- Profile Image and Greeting (Centered) -->
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <img src="{% static 'images/sara.gif' %}" alt="Profile" class="rounded-circle me-2" style="width: 40px; height: 40px;">
+                                    <h5 class="text-warning mb-0" style="font-weight: bold;">HI SARA HERE</h5>
+                                </div>
+
+                                <!-- More Button (Right) -->
+                                <div class="d-flex align-items-center ms-3">
+                                    <button class="btn bg-transparent text-warning border-0 p-0" style="font-size: 1.3rem;" data-bs-toggle="modal" data-bs-target="#menuModal">
+                                        <i class="fas fa-ellipsis-v" style="color: #ffc823;"></i> <!-- Yellow color for the three dots menu -->
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Second Row with Buttons (Language, Mute/Speak, QR) -->
+                        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; box-sizing: border-box; padding-bottom: 10px; gap: 3px">
+                            <!-- Language Dropdown (Left End) -->
+                            <div style="flex-shrink: 0; width:auto-4px;">
+                                <select id="language-dropdown" style="font-size: 0.8rem; padding: 5px 5px 7px 13px; color: #5a4029; font-weight: bold; background-color: white; border: 1px solid #5a4029; border-radius: 25px; width: 100%; box-sizing: border-box;">
+                                    <option value="en" style="color: #5a4029; font-weight: bold;">Select your Language</option>
+                                </select>
+                            </div>
+
+                            <!-- Middle space (flex-grow to push buttons to the right) -->
+                            <div style="flex-grow: 1;"></div>
+
+                            <!-- Buttons (Right End) -->
+                            <div style="display: flex; justify-content: flex-end; align-items: center; gap: 5px; width: auto;padding-bottom: 10px;">
+                                <!-- Speak/Mute as a clickable label -->
+                                <a href="javascript:void(0);" id="speak-link" class="speak-label">
+                                    <i class="fas fa-volume-up" style="font-size: 1rem; color: #5a4029;"></i>
+                                    <span style="color: #5a4029; font-weight: bold;">Speak</span>
+                                </a>
+
+                                <!-- QR Button -->
+                                <a href="javascript:void(0);" id="qr-icon" class="qr-label" data-bs-toggle="modal" data-bs-target="#qrModal">
+                                  <i class="fas fa-qrcode" style="font-size: 1rem; color: #5a4029;"></i>
+                                  <span style="color: #5a4029; font-weight: bold;">QR</span>
+                                </a>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Window with Background Image -->
+            <div id="chat-window" class="flex-grow-1">
+                <div id="chat-container" style="padding: 15px; box-sizing: border-box;">
+                    <div id="messages"></div>
+                </div>
+            </div>
+
+            <!-- Chat Input Section -->
+            <div class="card shadow-lg border-0" id="input-section" style="background-color: #d7baa0; padding: 5px; border-radius: 10px;">
+                <div class="card-body p-2 d-flex align-items-center justify-content-center" style="padding: 5px;">
+                    <form id="chat-form" method="post" autocomplete="off" class="d-flex w-100 justify-content-center align-items-center">
+                        {% csrf_token %}
+                        <!-- Input Field -->
+                        <input
+                            type="text"
+                            id="user-input"
+                            placeholder="Type your message..."
+                            style="font-size: 1rem; font-weight: bold; padding: 10px; background-color: #d7baa0; color: black; border: none; outline: none; width: calc(100% - 110px); margin-right: 10px;"
+                        />
+
+                        <!-- Button Group -->
+                        <div class="d-flex align-items-center gap-2">
+                            <!-- Voice Button -->
+                            <button
+                                type="button"
+                                id="voice-btn"
+                                style="font-size: 1rem; padding: 6px; width: 40px; height: 40px; background-color: #5a4029; color: #ffc823; border: none; border-radius: 50%; display: flex; justify-content: center; align-items: center;">
+                                <i class="fas fa-microphone" style="color: #ffc823; font-size: 1.2rem;"></i>
+                            </button>
+                            <!-- Send Button -->
+                            <button
+                                type="submit"
+                                id="send-btn"
+                                style="font-size: 1rem; padding: 6px 12px; background-color: #5a4029; color: #ffc823; border: none; border-radius: 25px; font-weight: bold; display: flex; justify-content: center; align-items: center;">
+                                <i class="fa fa-paper-plane" aria-hidden="true" style="color: #ffc823; font-size: 1.2rem; margin-right: 8px;"></i>
+                                <span>SEND</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <footer class="footer">
+                {% include 'includes/footer_chat.html' %}
+            </footer>
+        </section>
+    </div>
+</div>
+
+
+
+<!-- Modal for Menu -->
+<div class="modal fade" id="menuModal" tabindex="-1" aria-labelledby="menuModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="max-width: 50%; position: absolute; right: 0;">
+    <div class="modal-content">
+      <div class="modal-header d-flex justify-content-center align-items-center flex-column">
+          <h5 class="modal-title" id="menuModalLabel" style="color: #5a4029; font-weight: bold; text-align: center; flex-grow: 1;">Options</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    </div>
+      <div class="modal-body">
+        <!-- List of Options -->
+        <div class="d-flex flex-column">
+          <!-- Maps Option -->
+
+            <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #d7baa0; color: #5a4029; text-align: left;">
+            <i style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> <strong> Hello {{ request.user.username }}</strong>!
+          </a>
+
+          <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #5a4029; color: #ffc823; text-align: left;">
+            <i class="fas fa-map-marker-alt" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> Maps
+          </a>
+
+          <!-- Download Tickets Option -->
+            <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #5a4029; color: #ffc823; text-align: left;" id="download-tickets">
+                <i class="fas fa-download" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> Download Tickets
+            </a>
+
+
+          <!-- Feedback Option -->
+          <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #5a4029; color: #ffc823; text-align: left;">
+            <i class="fas fa-comment-dots" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> Feedback
+          </a>
+
+          <!-- Help and Support Option -->
+          <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #5a4029; color: #ffc823; text-align: left;">
+            <i class="fas fa-life-ring" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> Help and Support
+          </a>
+
+          <!-- Report an Issue Option -->
+          <a href="javascript:void(0);" class="speak-label mb-2 d-flex align-items-center" style="font-size: 0.9rem; padding: 8px; border-radius: 25px; background-color: #5a4029; color: #ffc823; text-align: left;">
+            <i class="fas fa-exclamation-circle" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i> Report an Issue
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+        <!-- Close button -->
+        <a href="javascript:void(0);" id="close-link-menu" class="speak-label" data-bs-dismiss="modal">
+          <i class="fas fa-times" style="font-size: 1.2rem; color: #5a4029;"></i>
+          <span style="color: #5a4029; font-weight: bold;">Close</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<!-- Modal for QR Codes -->
+<div class="modal fade" id="qrModal" tabindex="-1" aria-labelledby="qrModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable" style="max-width: 100%; height: 75vh; margin-right: 0;">
+    <div class="modal-content" style="height: 100%; overflow: hidden;">
+      <div class="modal-header d-flex justify-content-center align-items-center" style="flex-grow: 1;">
+        <h5 class="modal-title" id="qrModalLabel" style="color: #5a4029; font-weight: bold; text-align: center; flex-grow: 1;">QR TICKETS</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="height: calc(75vh - 60px); overflow-y: auto;">
+        <p style="text-align: center; font-weight: bold; color: #5a4029;">Your ticket(s) QR codes:</p>
+
+        <!-- Carousel for QR Codes -->
+        <div id="qrCodeCarousel" class="carousel slide" data-bs-ride="false" style="width: 100%; display: flex; justify-content: center;">
+          <div class="carousel-inner" id="carousel-inner">
+            <!-- QR Code items will be dynamically inserted here -->
+          </div>
+          <div class="carousel-controls" style="position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: space-between; padding: 0 10px;">
+            <button class="carousel-control-prev" type="button" data-bs-target="#qrCodeCarousel" data-bs-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Previous</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#qrCodeCarousel" data-bs-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="visually-hidden">Next</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Display Slide Number -->
+        <div id="slideCounter" class="text-center mt-2" style="font-weight: bold; color: #5a4029;">
+            Slide 1 of X
+        </div>
+      </div>
+      <div class="modal-footer justify-content-center">
+
+    <a href="javascript:void(0);" id="splitTicketBtn" class="speak-label" >
+      <i class="fas fa-split" style="font-size: 1.2rem; color: #5a4029;"></i>
+      <span style="color: #5a4029; font-weight: bold;">Split Tickets</span>
+    </a>
+
+
+        <a href="javascript:void(0);" id="close-link-qr" class="speak-label" data-bs-dismiss="modal">
+          <i class="fas fa-times" style="font-size: 1.2rem; color: #5a4029;"></i>
+          <span style="color: #5a4029; font-weight: bold;">Close</span>
+        </a>
+
+
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+<style>
+
+
+    /* Full screen wrapper with red background on left and right */
+.full-screen-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;  /* Center horizontally */
+  align-items: center;      /* Center vertically */
+  background-color: #a1622a;    /* Background color for the left and right sides */
+}
+
+/* Centered content container */
+.centered-container {
+  width: 500px;
+  height: 770px;             /* Automatically adjust height */
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  padding-bottom: 40px;
+
+}
+
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.responsive-section {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Chat Window */
+#chat-window {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+  background-image: url('{% static "images/chatbg.png" %}'); /* Background image */
+  background-size: cover;
+  background-position: center;
+}
+
+/* Message Styles */
+#messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+/* Default message bubble style */
+.message {
+  padding: 12px 18px; /* Padding for the message bubbles */
+  border-radius: 25px; /* Rounded corners for message bubbles */
+  max-width: 75%; /* Maximum width to ensure the message bubble doesn't get too wide */
+  font-size: 1rem; /* Font size for the message text */
+  margin: 3px 0; /* Vertical margin between messages */
+  background-color: transparent; /* No background by default */
+  font-weight: bold; /* Default font weight for both user and bot */
+  font-family: 'Arial', sans-serif; /* Default font */
+  word-wrap: break-word; /* Ensure long words break onto new lines */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Light shadow for bubble effect */
+  width: auto; /* Auto width so it adapts to the message content */
+  display: inline-block; /* So messages do not take up the full width */
+}
+
+.message.user {
+  background-color: #688662; /* User message background color (greenish) */
+  align-self: flex-end; /* Position on the right side */
+  color: white; /* Text color for user message */
+  font-size: 0.9rem; /* Font size for user messages */
+  text-align: right; /* Right align user messages */
+  margin-left: auto; /* Push the user message to the right */
+}
+
+/* Bot message styling */
+.message.bot {
+  background-color: #a1622a; /* Bot message background color (brownish) */
+  align-self: flex-start; /* Position on the left side */
+  color: white; /* Text color for bot message */
+  font-size: 0.9rem; /* Larger text for bot message */
+  text-align: left; /* Left align bot messages */
+  margin-right: auto; /* Push the bot message to the left */
+}
+
+/* Adjustments for Message Alignment */
+.message.user {
+  text-align: right; /* Right align user messages */
+  margin-left: auto; /* Align user messages to the right side */
+}
+
+.message.bot {
+  text-align: left; /* Left align bot messages */
+  margin-right: auto; /* Align bot messages to the left side */
+}
+
+/* Optional: Message Bubbles with Tail (for visual effect) */
+.message::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  width: 16px;
+  height: 16px;
+  background-color: transparent;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid;
+}
+
+.message.user::after {
+  border-top-color: #688662; /* Tail color for user message */
+  left: 10px; /* Position tail for user on the right */
+}
+
+.message.bot::after {
+  border-top-color: #a1622a; /* Tail color for bot message */
+  right: 10px; /* Position tail for bot on the left */
+}
+
+
+
+/* Other styles (kept unchanged from previous code) */
+#user-input {
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+
+
+
+
+/* Styling for clickable labels (Speak/Mute and Show QR) */
+.speak-label, .qr-label {
+    font-size: 0.8rem; /* Reduced font size */
+    padding: 8px 15px; /* Reduced padding to make the button smaller */
+    background-color: #ffc823; /* Yellow background */
+    color: #5a4029;             /* Brown text */
+    border: none;
+    border-radius: 25px;
+    width: auto;                /* Allow label width to adjust automatically */
+    box-sizing: border-box;     /* Ensures padding is included in the width */
+    font-weight: bold;          /* Bold text */
+    display: flex;
+    justify-content: center;    /* Center icon and text */
+    align-items: center;        /* Vertically align items */
+    cursor: pointer;           /* Add a pointer cursor to indicate it's clickable */
+    text-decoration: none;      /* Remove underline for links */
+}
+
+/* Ensuring icon and text are properly spaced */
+.speak-label i, .qr-label i {
+    font-size: 1.2rem;  /* Reduced icon size */
+    margin-right: 5px;  /* Reduced space between icon and text */
+}
+
+/* Remove all hover and active background changes */
+.speak-label:hover, .qr-label:hover,
+.speak-label:active, .qr-label:active {
+    background-color: #ffc823; /* Keep the background yellow on hover/click */
+    transform: none;           /* Remove shrink effect on click */
+}
+
+/* Remove focus effects (optional) */
+.speak-label:focus, .qr-label:focus {
+    outline: none;             /* Remove focus outline */
+    box-shadow: none;          /* Remove focus shadow */
+}
+
+/* Remove default dropdown arrow */
+#language-dropdown {
+    -webkit-appearance: none; /* Remove default arrow in Safari */
+    -moz-appearance: none;    /* Remove default arrow in Firefox */
+    appearance: none;         /* Remove default arrow in modern browsers */
+    padding-right: 25px;      /* Add space for custom arrow */
+    position: relative;       /* Position for custom arrow */
+}
+
+/* Custom down arrow */
+#language-dropdown::after {
+    content: "\25BC";         /* Unicode character for down arrow (▼) */
+    font-size: 1.2rem;        /* Adjust the size of the arrow */
+    color: #5a4029;           /* Set the color of the arrow to brown */
+    position: absolute;       /* Position the arrow */
+    right: 10px;              /* Position the arrow to the right */
+    top: 50%;                 /* Vertically align the arrow */
+    transform: translateY(-50%); /* Adjust vertical alignment */
+}
+
+/* Change the arrow when the dropdown is open (on focus) */
+#language-dropdown:focus::after {
+    content: "\25B2";         /* Unicode character for up arrow (▲) */
+}
+
+
+
+
+/* Aligning the profile and text in the center of the row for general layout */
+.d-flex.justify-content-center {
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Vertically align items */
+}
+
+.d-flex.align-items-center {
+    display: flex;
+    align-items: center;
+}
+
+.d-flex.justify-content-between {
+    display: flex;
+    justify-content: space-between;
+}
+
+
+#user-input:focus {
+  outline: none; /* Removes the focus outline */
+  border: none;  /* Removes any borders on focus */
+}
+
+
+
+
+
+
+.footer {
+  color: grey;
+  text-align: center;
+  padding: 5px 0;
+  font-size: 5px;
+  font-family: Arial, sans-serif;
+}
+
+
+
+
+
+h5 {
+  font-size: 1.2rem;
+
+}
+
+
+
+
+
+/* Style the carousel navigation arrows */
+.carousel-control-prev,
+.carousel-control-next {
+    background-color: #5a4029; /* Dark background for arrows */
+    border-radius: 50%; /* Circular background for arrows */
+    font-weight: bold; /* Make the arrows bold */
+    color: white; /* White color for the arrows */
+    font-size: 1.5rem; /* Larger font size for the arrows */
+    height: 40px; /* Set a fixed size for the arrows */
+    width: 40px; /* Set a fixed size for the arrows */
+}
+
+/* Style the icons inside the arrows */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: white; /* White color for the arrow icons */
+    border-radius: 50%; /* Make the arrow icons circular */
+    width: 100%; /* Ensure the icon fits within the circle */
+    height: 100%; /* Ensure the icon fits within the circle */
+}
+
+/* Optional: Add more styling to make arrows stand out */
+.carousel-control-prev-icon {
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-left" viewBox="0 0 16 16%22%3E%3Cpath d="M11.854 1.146a.5.5 0 0 0-.708 0L5 7.293 4.854 7.5l.146.207 6 6a.5.5 0 1 0 .708-.707L6.707 8 11.854 2.854a.5.5 0 0 0 0-.708z"/%3E%3C/svg%3E');
+}
+
+.carousel-control-next-icon {
+    background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-chevron-right" viewBox="0 0 16 16%22%3E%3Cpath d="M4.146 1.146a.5.5 0 0 1 .708 0L11 7.293 11.146 7.5l-.146.207-6 6a.5.5 0 1 1-.708-.707L9.293 8 4.146 2.854a.5.5 0 0 1 0-.708z"/%3E%3C/svg%3E');
+}
+
+
+
+
+
+/* Mobile View */
+@media (max-width: 768px) {
+  .container {
+    padding-top: 0 !important;
+  }
+
+  .page-header {
+    min-height: 8vh;
+  }
+
+  #chat-window {
+    margin-top: 0;
+  }
+}
+
+</style>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+
+
+
+
+
+
+    //qr code pdf download------------------------------------------------------------
+document.getElementById('download-tickets').addEventListener('click', function () {
+    // Fetch the QR codes and ticket details for the session
+    fetch('/chat/send_message/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),  // Ensure CSRF protection
+        },
+        body: JSON.stringify({
+            message: "fetch_qr_codes", // Use the same message you're using to fetch QR codes
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.qr_codes && data.qr_codes.length > 0) {
+            // Create a new jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Loop through each QR code and generate a page for each
+            data.qr_codes.forEach((qr, index) => {
+                // Create an image element for the QR code (assuming qr.qr_code_url is the URL)
+                const img = new Image();
+                img.src = qr.qr_code_url;
+
+                // Wait for the image to load before adding it to the PDF
+                img.onload = () => {
+                    // Add the QR code image to the PDF (positioning and scaling)
+                    doc.addImage(img, 'PNG', 10, 10, 180, 180); // Adjust the coordinates and size as needed
+
+                    // Add ticket information (adult count, child count, total tickets)
+                    const adultCount = qr.adult_count;
+                    const childCount = qr.child_count;
+                    const totalTickets = qr.total_tickets;
+                    doc.text(`Total Tickets: ${totalTickets}`, 10, 200);
+                    doc.text(`Adults: ${adultCount}`, 10, 210);
+                    doc.text(`Children: ${childCount}`, 10, 220);
+
+                    // Add a new page after each QR code except the last one
+                    if (index < data.qr_codes.length - 1) {
+                        doc.addPage();
+                    }
+
+                    // If it's the last QR code, finalize the download
+                    if (index === data.qr_codes.length - 1) {
+                        doc.save('tickets.pdf');
+                        showSuccessPopup();
+                    }
+                };
+            });
+        } else {
+            alert('No QR codes found for this session.');
+        }
+    })
+    .catch(error => {
+        console.error('Error generating PDF:', error);
+    });
+});
+
+// Function to display the floating success popup
+function showSuccessPopup() {
+    // Create the floating popup element
+    const popup = document.createElement('a');
+    popup.href = 'javascript:void(0);';
+    popup.classList.add('speak-label', 'mb-2', 'd-flex', 'align-items-center');
+    popup.style.fontSize = '0.9rem';
+    popup.style.padding = '8px';
+    popup.style.borderRadius = '25px';
+    popup.style.backgroundColor = '#5a4029';
+    popup.style.color = '#ffc823';
+    popup.style.textAlign = 'left';
+    popup.innerHTML = `
+        <i class="fas fa-exclamation-circle" style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i>
+        Successfully downloaded PDF
+    `;
+
+    // Append the popup to the body
+    document.body.appendChild(popup);
+
+    // Make it appear with a slight animation
+    setTimeout(() => {
+        popup.style.transition = 'opacity 0.5s ease-in-out';
+        popup.style.opacity = '1';
+    }, 10);
+
+    // After 3 seconds, hide and remove the popup
+    setTimeout(() => {
+        popup.style.transition = 'opacity 0.5s ease-in-out';
+        popup.style.opacity = '0';
+        setTimeout(() => {
+            popup.remove();
+        }, 500); // After the fade-out, remove it
+    }, 3000); // Wait 3 seconds before removing the popup
+}
+
+
+
+
+
+
+//qr code icon------------------------------------------------------------
+function fetchAndDisplayQRCodes(multiplyByThree = false) {
+    fetch('/chat/send_message/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCSRFToken(),
+        },
+        body: JSON.stringify({
+            message: "fetch_qr_codes",
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Fetched data:', data);  // Log the fetched QR codes
+
+        const carouselInner = document.getElementById("carousel-inner");
+        const slideCounter = document.getElementById("slideCounter");
+
+        carouselInner.innerHTML = ''; // Clear previous carousel items
+
+        if (data.qr_codes && data.qr_codes.length > 0) {
+            // Insert each QR code into the carousel
+            data.qr_codes.forEach((qr, index) => {
+                const isActive = index === 0 ? 'active' : '';
+                const qrCard = `
+                    <div class="carousel-item ${isActive}">
+                        <div class="d-flex justify-content-center">
+                            <img src="${qr.qr_code_url}" alt="QR Code" style="width: 80%; max-width: 400px;" />
+                        </div>
+                    </div>
+                `;
+                carouselInner.innerHTML += qrCard;
+            });
+
+            // Determine slide count
+            const slideCount = multiplyByThree ? data.qr_codes.length * 3 : data.qr_codes.length;
+            console.log('Total slides:', slideCount);
+
+            // Set the initial slide counter text
+            slideCounter.innerHTML = `Slide 1 of ${slideCount}`;
+
+            // Update ticket details (total tickets, adults, children)
+            const totalTickets = data.qr_codes.reduce((acc, qr) => acc + qr.total_tickets, 0);
+            const adultCount = data.qr_codes.reduce((acc, qr) => acc + qr.adult_count, 0);
+            const childCount = data.qr_codes.reduce((acc, qr) => acc + qr.child_count, 0);
+
+            document.getElementById("totalTickets").innerText = totalTickets;
+            document.getElementById("adultCount").innerText = adultCount;
+            document.getElementById("childCount").innerText = childCount;
+
+            // Show the modal after QR codes are added
+            console.log("Showing modal...");
+            $('#qrModal').modal('show');
+        } else {
+            alert(data.reply || "No QR codes found.");
+        }
+
+        // Initialize the carousel
+        const carousel = new bootstrap.Carousel('#qrCodeCarousel', {
+            interval: false,
+        });
+
+        // Update slide count on carousel slide change
+        $('#qrCodeCarousel').on('slid.bs.carousel', function () {
+            const activeSlideIndex = $('#qrCodeCarousel .carousel-item.active').index() + 1;
+            slideCounter.innerHTML = `Slide ${activeSlideIndex} of ${slideCount}`;
+        });
+    })
+    .catch(error => {
+        console.error('Error fetching QR codes:', error);
+    });
+}
+
+// Event listener for QR icon
+document.getElementById('qr-icon').addEventListener('click', function () {
+    fetchAndDisplayQRCodes();  // Default behavior
+});
+
+// Event listener for Split Tickets button
+document.getElementById('splitTicketBtn').addEventListener('click', function () {
+    fetchAndDisplayQRCodes(true);  // Multiply slide count by 3
+});
+
+// CSRF Token Helper
+function getCSRFToken() {
+    const name = 'csrftoken';
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(`${name}=`)) {
+            return decodeURIComponent(cookie.split('=')[1]);
+        }
+    }
+    return null;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let isListening = false;
+    let timeoutHandle;
+    const userInput = document.getElementById("user-input");
+    const voiceBtn = document.getElementById("voice-btn");
+    const chatForm = document.getElementById("chat-form");
+
+    // Function to send a message to the backend and handle the response
+    async function sendMessageToBot(message, displayUserMessage = true) {
+        try {
+            const response = await fetch("/chat/send_message/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({ message }),
+            });
+
+            const data = await response.json();
+
+            if (data.reply) {
+                addMessage("Bot", data.reply);
+
+                if (data.buttons && message.toLowerCase() === "service") {
+                    displayServiceButtons(data.buttons);
+                }
+            }
+        } catch (error) {
+            console.error("Error communicating with the server:", error);
+            addMessage("Bot", "Error communicating with the server.");
+        }
+    }
+
+    const voiceControl = document.createElement("div");
+    voiceControl.id = "voice-control";
+    voiceControl.classList.add("voice-control-animation", "d-none");
+    document.body.appendChild(voiceControl);
+
+    let currentAudio = null; // Track the current audio being played
+
+
+
+
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = true;
+
+        voiceBtn.addEventListener("click", () => {
+            if (isListening) {
+                recognition.stop();
+                stopVoiceAnimation();
+            } else {
+                recognition.start();
+                startVoiceAnimation();
+            }
+            isListening = !isListening;
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map((result) => result[0].transcript)
+                .join("");
+
+            userInput.value = transcript;
+
+            if (event.results[0].isFinal) {
+                autoSendMessage();
+            }
+        };
+
+        recognition.onend = () => {
+            stopVoiceAnimation();
+            isListening = false;
+        };
+
+        function autoSendMessage() {
+            clearTimeout(timeoutHandle);
+            timeoutHandle = setTimeout(() => {
+                if (userInput.value.trim() !== "") {
+                    chatForm.dispatchEvent(new Event("submit"));
+                }
+            }, 1000);
+        }
+    } else {
+        voiceBtn.disabled = true;
+        alert("Voice recognition is not supported in this browser.");
+    }
+
+    function startVoiceAnimation() {
+        voiceControl.classList.remove("d-none");
+        const inputSectionRect = document.getElementById("input-section").getBoundingClientRect();
+        voiceControl.style.left = `${inputSectionRect.left + inputSectionRect.width / 2}px`;
+        voiceControl.style.top = `${inputSectionRect.top - 50}px`;
+        voiceControl.style.transform = "translate(-50%, 0)";
+    }
+
+    function stopVoiceAnimation() {
+        voiceControl.classList.add("d-none");
+    }
+
+    function adjustChatWindowHeight() {
+        const chatWindow = document.getElementById("chat-window");
+        const inputSection = document.getElementById("input-section");
+        const footer = document.querySelector(".footer");
+        const availableHeight = window.innerHeight - inputSection.offsetHeight - footer.offsetHeight - 20;
+        chatWindow.style.maxHeight = `${availableHeight}px`;
+        chatWindow.style.overflowY = "auto";
+    }
+
+    adjustChatWindowHeight();
+    window.addEventListener("resize", adjustChatWindowHeight);
+
+    let isSpeaking = true;
+    let selectedLanguage = "en";
+    document.getElementById("speak-link").addEventListener("click", () => {
+        isSpeaking = !isSpeaking;
+
+        // Stop any ongoing audio or speech playback
+        if (!isSpeaking) {
+            stopCurrentAudio();
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        // Update the button's appearance
+        document.getElementById("speak-link").innerHTML = isSpeaking
+            ? '<i class="fas fa-volume-up" style="font-size: 1rem; color: #5a4029;"></i> <span style="color: #5a4029; font-weight: bold;">Speak</span>'
+            : '<i class="fas fa-volume-mute" style="font-size: 1rem; color: #5a4029;"></i> <span style="color: #5a4029; font-weight: bold;">Mute</span>';
+    });
+
+
+
+    const indianLanguages = {
+        en: "English",
+        hi: "Hindi - हिन्दी",
+        ta: "Tamil - தமிழ்",
+        te: "Telugu - తెలుగు",
+        kn: "Kannada - ಕನ್ನಡ",
+        ml: "Malayalam - മലയാളം",
+        bn: "Bengali - বাংলা",
+        gu: "Gujarati - ગુજરાતી",
+        mr: "Marathi - मराठी",
+        pa: "Punjabi - ਪੰਜਾਬੀ",
+        ur: "Urdu - اردو",
+        fr: "French - Français",
+        de: "German - Deutsch",
+        es: "Spanish - Español",
+        it: "Italian - Italiano",
+        pt: "Portuguese - Português",
+        nl: "Dutch - Nederlands",
+        ru: "Russian - Русский",
+        ja: "Japanese - 日本語",
+        zh: "Chinese - 中文",
+        ar: "Arabic - العربية",
+        ko: "Korean - 한국어",
+        tr: "Turkish - Türkçe",
+        th: "Thai - ภาษาไทย",
+    };
+
+
+    const dropdown = document.getElementById("language-dropdown");
+    for (const [code, name] of Object.entries(indianLanguages)) {
+        const option = document.createElement("option");
+        option.value = code;
+        option.textContent = name;
+        dropdown.appendChild(option);
+    }
+
+    dropdown.addEventListener("change", function () {
+        selectedLanguage = this.value;
+    });
+
+
+    document.getElementById("chat-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Stop current audio playback
+        stopCurrentAudio();
+
+        // Clear existing buttons when a new message is sent
+        clearServiceButtons();
+
+        const userInput = document.getElementById("user-input").value.trim();
+        if (!userInput) return;
+
+        addMessage("You", userInput);
+        const loadingMessage = addLoadingIndicator();
+
+        try {
+            const response = await fetch("/chat/send_message/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                    message: userInput,
+                    language: selectedLanguage,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.reply) {
+                removeMessage(loadingMessage);
+                addMessage("Bot", data.reply);
+
+                if (data.buttons) {
+                    displayServiceButtons(data.buttons);
+                }
+
+                // Only play audio if isSpeaking is true
+                if (data.audio_url && isSpeaking) {
+                    currentAudio = new Audio(data.audio_url);
+                    currentAudio.play();
+                }
+
+                if (data.qr_codes) {
+                    displayQRCodes(data.qr_codes);
+                }
+            }
+        } catch (error) {
+            console.error("Error communicating with the server:", error);
+            removeMessage(loadingMessage);
+            addMessage("Bot", "Error communicating with the server.");
+        }
+
+        document.getElementById("user-input").value = "";
+    });
+
+
+    function addMessage(sender, message) {
+        const messagesDiv = document.getElementById("messages");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", sender === "You" ? "user" : "bot");
+        messageDiv.textContent = message;
+        messagesDiv.appendChild(messageDiv);
+        document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+    }
+
+
+    function addLoadingIndicator() {
+        const messagesDiv = document.getElementById("messages");
+        const loadingDiv = document.createElement("div");
+        loadingDiv.classList.add("message", "bot", "loading-indicator");
+        loadingDiv.textContent = ".....";
+        messagesDiv.appendChild(loadingDiv);
+        document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+        return loadingDiv;
+    }
+
+    function removeMessage(messageElement) {
+        if (messageElement && messageElement.parentNode) {
+            messageElement.parentNode.removeChild(messageElement);
+        }
+    }
+
+    function clearServiceButtons() {
+        const buttonsDiv = document.querySelector(".service-buttons");
+        if (buttonsDiv) {
+            buttonsDiv.remove();
+        }
+    }
+
+    function displayServiceButtons(buttons) {
+    clearServiceButtons();
+
+    const chatContainer = document.getElementById("chat-container");
+    const buttonsDiv = document.createElement("div");
+    buttonsDiv.classList.add("service-buttons");
+    buttonsDiv.style.display = "flex";  // Use flexbox for row layout
+    buttonsDiv.style.flexWrap = "wrap"; // Allow wrapping to the next row
+    buttonsDiv.style.gap = "10px";  // Optional: Add some space between the buttons
+
+    let rowDiv;  // A div for each row of buttons
+
+    buttons.forEach((button, index) => {
+        // If it's the first button in the row, create a new row div
+        if (index % 2 === 0) {
+            rowDiv = document.createElement("div");
+            rowDiv.style.display = "flex";  // Ensure buttons in the same row
+            rowDiv.style.width = "100%";  // Full width for the row
+            rowDiv.style.justifyContent = "space-between";  // Make buttons align nicely
+        }
+
+        // Create the button element
+        const buttonElement = document.createElement("a");
+        buttonElement.href = "javascript:void(0);";
+        buttonElement.classList.add("speak-label", "mb-2", "d-flex", "align-items-center");
+        buttonElement.style.fontSize = "0.9rem";
+        buttonElement.style.padding = "8px";
+        buttonElement.style.borderRadius = "25px";
+        buttonElement.style.backgroundColor = "#a62f15";  // Set the background color
+        buttonElement.style.color = "#ffc823";  // Set the text color
+        buttonElement.style.textAlign = "left";
+        buttonElement.style.flex = "1";  // Allow buttons to take equal width
+
+        // Add an icon and the button title
+        buttonElement.innerHTML = `
+            <i  style="color: #ffc823; font-size: 1.2rem; margin-right: 10px;"></i>
+            ${button.title}
+        `;
+
+        // Handle button actions
+        if (button.payload === "confirm") {
+            buttonElement.onclick = async (e) => {
+                e.preventDefault();
+                stopCurrentAudio();
+                const response = await fetch("/chat/send_message/", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken"),
+                    },
+                    body: JSON.stringify({
+                        message: button.payload,
+                        language: selectedLanguage,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.reply) {
+                    addMessage("Bot", data.reply);
+                    if (data.buttons) {
+                        displayServiceButtons(data.buttons);
+                    }
+                }
+            };
+        }
+
+
+        else if (button.payload === "/select_nationality_indian" || button.payload === "/select_nationality_foreigner") {
+            buttonElement.onclick = async (e) => {
+                e.preventDefault();
+                stopCurrentAudio(); // Stop current audio playback
+
+                // Map the payload to the actual message
+                const message = button.payload === "/select_nationality_indian" ? "I am Indian" : "I am Foreigner";
+
+                // Display the user's message
+                addMessage("You", message);
+
+                // Clear the buttons after selection
+                clearServiceButtons();
+
+                try {
+                    const response = await fetch("/chat/send_message/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                        body: JSON.stringify({
+                            message: message,  // Send the correct message
+                            language: selectedLanguage,
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.reply) {
+                        addMessage("Bot", data.reply);
+
+                        // Handle buttons for further actions if provided
+                        if (data.buttons) {
+                            displayServiceButtons(data.buttons);
+                        }
+
+                        // Handle audio playback if audio URL is provided
+                        if (data.audio_url) {
+                            currentAudio = new Audio(data.audio_url);
+                            currentAudio.play();
+                        }
+                    } else {
+                        addMessage("Bot", "Error processing nationality selection.");
+                    }
+                } catch (error) {
+                    console.error("Error processing nationality selection:", error);
+                    addMessage("Bot", "Error processing nationality selection.");
+                }
+            };
+        }
+
+
+
+
+
+        // clearServiceButtons();  Assuming this function clears any service buttons on the page
+
+        else if (button.payload === "pay_now") {
+            buttonElement.onclick = async (e) => {
+                e.preventDefault();
+                stopCurrentAudio(); // Stop current audio playback
+
+                try {
+                    // Send a request to your backend to initiate payment
+                    const response = await fetch("/chat/send_message/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                        body: JSON.stringify({
+                            message: button.payload,
+                            language: selectedLanguage,
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.payment_url) {
+                        // Open the payment page in a new tab
+                        const paymentWindow = window.open(data.payment_url);
+                        clearServiceButtons();
+
+                        // After a short delay (e.g., 5 seconds), check the payment status
+                        setTimeout(async () => {
+                            try {
+                                const verifyResponse = await fetch("/chat/send_message/", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": getCookie("csrftoken"),
+                                    },
+                                    body: JSON.stringify({
+                                        message: "payment_successful",
+                                        language: selectedLanguage,
+                                    }),
+                                });
+
+                                const verifyData = await verifyResponse.json();
+                                if (verifyData.reply) {
+                                    addMessage("Bot", verifyData.reply);
+
+                                    if (verifyData.reply_type === "qr_codes" && verifyData.qr_codes) {
+                                        displayQRCodes(verifyData.qr_codes);
+                                    }
+                                }
+
+                                // Close the payment tab if the payment is successful
+                                if (paymentWindow) {
+                                    paymentWindow.close();  // Close the payment tab after the successful payment
+                                }
+                            } catch (error) {
+                                console.error("Error verifying payment:", error);
+                                addMessage("Bot", "Error verifying payment.");
+                            }
+                        }, 2000);
+                    } else {
+                        addMessage("Bot", "Payment initiation failed.");
+                    }
+                } catch (error) {
+                    console.error("Error initiating payment:", error);
+                    addMessage("Bot", "Error initiating payment.");
+                }
+            };
+        }
+
+        // Handle other buttons
+        else {
+            buttonElement.onclick = (e) => {
+                e.preventDefault();
+                const userInput = document.getElementById("user-input");
+                userInput.value = button.payload;
+                clearServiceButtons();
+                stopCurrentAudio();
+                document.getElementById("chat-form").dispatchEvent(new Event("submit"));
+            };
+        }
+
+        // Append the button to the current row
+        rowDiv.appendChild(buttonElement);
+
+        // After every two buttons, append the row div to the buttons div
+        if ((index + 1) % 2 === 0 || index === buttons.length - 1) {
+            buttonsDiv.appendChild(rowDiv);
+        }
+    });
+
+    // Append the buttonsDiv to the chat container
+    chatContainer.appendChild(buttonsDiv);
+}
+
+
+
+
+
+    function displayQRCodes(qrCodes) {
+        const messagesDiv = document.getElementById("messages");
+
+        qrCodes.forEach((qrCodeObj, index) => {
+            const qrContainer = document.createElement("div");
+            qrContainer.classList.add("message", "bot");
+
+            const qrText = document.createElement("p");
+            qrText.textContent = `Here is your  QR code:`;
+
+            const qrImage = document.createElement("img");
+            qrImage.src = qrCodeObj.qr_code_url;
+            qrImage.alt = `QR Code ${index + 1}`;
+            qrImage.style.width = "150px";
+            qrImage.style.height = "150px";
+
+            qrContainer.appendChild(qrText);
+            qrContainer.appendChild(qrImage);
+            messagesDiv.appendChild(qrContainer);
+
+            document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+        });
+    }
+
+
+
+
+    function stopCurrentAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+            const [key, val] = cookie.split("=");
+            acc[key] = decodeURIComponent(val);
+            return acc;
+        }, {});
+        return cookies[name];
+    }
+
+
+    async function sendInitialMessages() {
+        // Send "hi" to get the welcome message
+        await sendMessageToBot("hi", false);
+
+        // Send "service" to display available services
+        await sendMessageToBot("service", false);
+    }
+
+    // Initialize the chatbot
+    sendInitialMessages();
+});
+
+</script>
+{% endblock content %}
+
+
+

@@ -1,0 +1,684 @@
+{% extends 'layouts/base_sections.html' %}
+{% load static %}
+
+{% block title %} Museum Chat-Bot {% endblock title %}
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <!-- Disable user zoom -->
+</head>
+{% block content %}
+
+<link
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+  rel="stylesheet"
+/>
+
+
+<section class="responsive-section">
+  <div class="container-fluid d-flex flex-column" style="padding: 0; height: 100vh;">
+    <!-- Chat Header -->
+    <div class="card shadow-lg border-0 mb-0" style="border-radius: 8px; background-color: #fff3f2;">
+      <div class="card-body text-center p-3">
+        <h5 class="text-gradient text-primary clickable" style="font-weight: bold; cursor: pointer;">
+          Hi There! Sara here
+          <img src="https://em-content.zobj.net/thumbs/240/apple/325/smiling-face-with-smiling-eyes_1f60a.png" alt="😊" style="width: 1em; height: 1em; vertical-align: middle;">
+        </h5>
+        <div class="card d-flex align-items-center justify-content-between p-2 mt-3" style="background-color: #fff; border-radius: 8px; border: 1px solid #ddd;">
+          <div class="d-flex justify-content-around w-100 align-items-center">
+            <!-- Mute/Speak Toggle -->
+            <a href="javascript:void(0);" id="speak-link" class="text-primary text-decoration-none">
+              <i class="fas fa-volume-up me-2"></i> Speak
+            </a>
+
+            <!-- Language Dropdown -->
+            <select id="language-dropdown" class="form-select form-select-sm d-inline w-auto ms-3">
+              <!-- Populate with Indian languages -->
+            </select>
+
+            <!-- QR Icon -->
+            <div class="d-flex align-items-center">
+              <i class="fas fa-qrcode text-success me-2" style="font-size: 1.5rem; cursor: pointer;" id="qr-icon"></i>
+              <span>QR</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Window -->
+    <div id="chat-window" class="flex-grow-1" style="overflow-y: auto; padding: 10px; background: #fff;">
+      <div id="chat-container" style="padding: 15px; box-sizing: border-box;">
+        <div id="messages"></div>
+      </div>
+    </div>
+
+    <!-- Chat Input Section -->
+      <div class="card shadow-lg border-0" id="input-section">
+        <div class="card-body p-2">
+          <form id="chat-form" method="post" autocomplete="off" class="d-flex align-items-center">
+            {% csrf_token %}
+            <input
+              type="text"
+              id="user-input"
+              class="form-control flex-grow-1 me-2"
+              placeholder="Type your message..."
+              style="border-radius: 8px; padding: 10px; font-size: 1rem;"
+            />
+
+            <!-- Button Group -->
+            <div class="d-flex align-items-center gap-2">
+              <!-- Voice Button -->
+              <button
+                type="button"
+                id="voice-btn"
+                class="btn bg-gradient-secondary"
+                style="border-radius: 8px; font-size: 0.9rem; padding: 8px; width: 50px;">
+                <i class="fas fa-microphone"></i>
+              </button>
+
+              <!-- Send Button -->
+              <button
+                type="submit"
+                class="btn bg-gradient-primary"
+                style="border-radius: 8px; font-size: 0.8rem; padding: 8px; width: 50px;">
+                Send
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+
+    <!-- Footer -->
+    <footer class="footer">
+      {% include 'includes/footer_chat.html' %}
+    </footer>
+  </div>
+</section>
+
+<style>
+/* General Styling */
+body, html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.responsive-section {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+#chat-window {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+#chat-container {
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 8px;
+}
+
+#messages {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  line-height: 1.4;
+}
+
+.message {
+  padding: 10px;
+  border-radius: 12px;
+  max-width: 75%;
+  text-align: left;
+  font-size: 0.9rem;
+  margin: 0 10px;
+}
+
+.message.user {
+  background: #cce5ff;
+  align-self: flex-end;
+  color: #0056b3;
+}
+
+.message.bot {
+  background: #e2e3e5;
+  align-self: flex-start;
+  color: #333;
+}
+
+.message.bot.loading-indicator {
+  font-weight: bold;
+  font-size: 1.5rem; /* Make it larger */
+  color: #666; /* A subtle color for loading */
+  text-align: left;
+}
+
+#user-input {
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  font-size: 1rem;
+}
+
+.btn {
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.5rem;
+}
+
+.footer {
+  color: grey;
+  text-align: center;
+  padding: 10px 0;
+  font-size: 1px;
+  font-family: Arial, sans-serif;
+}
+
+
+/* Voice Control Animation */
+.voice-control-animation {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(45deg, #4caf50, #2196f3);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.3);
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+}
+
+#chat-form {
+  display: flex;
+  align-items: center;
+}
+
+#user-input {
+  flex-grow: 1; /* Automatically fill remaining space */
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 1rem;
+}
+
+#voice-btn, #send-btn {
+  width: 50px; /* Fixed width for buttons */
+  padding: 8px;
+  text-align: center;
+}
+
+.d-flex.align-items-center {
+  gap: 0.5rem; /* Space between buttons */
+}
+
+@media (max-width: 768px) {
+  #user-input {
+    font-size: 0.9rem; /* Adjust font size for smaller screens */
+  }
+
+  #voice-btn,
+  #send-btn {
+    font-size: 0.8rem; /* Adjust button size for smaller screens */
+  }
+}
+
+/* Service Button Styling */
+.service-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.service-button {
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 14px;
+  width: 45%;
+}
+
+.service-button:hover {
+  background-color: #45a049;
+}
+
+
+
+
+  .qr-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.qr-code {
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.loading-message {
+    font-size: 14px;
+    color: #555;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.error-message {
+    font-size: 14px;
+    color: red;
+    text-align: center;
+    margin-top: 10px;
+}
+
+
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let isListening = false;
+    let timeoutHandle;
+    const userInput = document.getElementById("user-input");
+    const voiceBtn = document.getElementById("voice-btn");
+    const chatForm = document.getElementById("chat-form");
+
+    const voiceControl = document.createElement("div");
+    voiceControl.id = "voice-control";
+    voiceControl.classList.add("voice-control-animation", "d-none");
+    document.body.appendChild(voiceControl);
+
+    let currentAudio = null; // Track the current audio being played
+
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = "en-US";
+        recognition.interimResults = true;
+
+        voiceBtn.addEventListener("click", () => {
+            if (isListening) {
+                recognition.stop();
+                stopVoiceAnimation();
+            } else {
+                recognition.start();
+                startVoiceAnimation();
+            }
+            isListening = !isListening;
+        });
+
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map((result) => result[0].transcript)
+                .join("");
+
+            userInput.value = transcript;
+
+            if (event.results[0].isFinal) {
+                autoSendMessage();
+            }
+        };
+
+        recognition.onend = () => {
+            stopVoiceAnimation();
+            isListening = false;
+        };
+
+        function autoSendMessage() {
+            clearTimeout(timeoutHandle);
+            timeoutHandle = setTimeout(() => {
+                if (userInput.value.trim() !== "") {
+                    chatForm.dispatchEvent(new Event("submit"));
+                }
+            }, 1000);
+        }
+    } else {
+        voiceBtn.disabled = true;
+        alert("Voice recognition is not supported in this browser.");
+    }
+
+    function startVoiceAnimation() {
+        voiceControl.classList.remove("d-none");
+        const inputSectionRect = document.getElementById("input-section").getBoundingClientRect();
+        voiceControl.style.left = `${inputSectionRect.left + inputSectionRect.width / 2}px`;
+        voiceControl.style.top = `${inputSectionRect.top - 50}px`;
+        voiceControl.style.transform = "translate(-50%, 0)";
+    }
+
+    function stopVoiceAnimation() {
+        voiceControl.classList.add("d-none");
+    }
+
+    function adjustChatWindowHeight() {
+        const chatWindow = document.getElementById("chat-window");
+        const inputSection = document.getElementById("input-section");
+        const footer = document.querySelector(".footer");
+        const availableHeight = window.innerHeight - inputSection.offsetHeight - footer.offsetHeight - 20;
+        chatWindow.style.maxHeight = `${availableHeight}px`;
+        chatWindow.style.overflowY = "auto";
+    }
+
+    adjustChatWindowHeight();
+    window.addEventListener("resize", adjustChatWindowHeight);
+
+    let isSpeaking = true;
+    let selectedLanguage = "en";
+    document.getElementById("speak-link").addEventListener("click", () => {
+        isSpeaking = !isSpeaking;
+        document.getElementById("speak-link").innerHTML = isSpeaking
+            ? '<i class="fas fa-volume-up me-2"></i> Speak'
+            : '<i class="fas fa-volume-mute me-2"></i> Mute';
+    });
+
+    const indianLanguages = {
+        en: "English",
+        hi: "Hindi",
+        ta: "Tamil",
+        te: "Telugu",
+        kn: "Kannada",
+        ml: "Malayalam",
+        bn: "Bengali",
+        gu: "Gujarati",
+        mr: "Marathi",
+        pa: "Punjabi",
+        ur: "Urdu",
+    };
+
+    const dropdown = document.getElementById("language-dropdown");
+    for (const [code, name] of Object.entries(indianLanguages)) {
+        const option = document.createElement("option");
+        option.value = code;
+        option.textContent = name;
+        dropdown.appendChild(option);
+    }
+
+    dropdown.addEventListener("change", function () {
+        selectedLanguage = this.value;
+    });
+
+    document.getElementById("chat-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        // Stop current audio playback
+        stopCurrentAudio();
+
+        // Clear existing buttons when a new message is sent
+        clearServiceButtons();
+
+        const userInput = document.getElementById("user-input").value.trim();
+        if (!userInput) return;
+
+        addMessage("You", userInput);
+        const loadingMessage = addLoadingIndicator();
+
+        try {
+            const response = await fetch("/chat/send_message/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                    message: userInput,
+                    language: selectedLanguage,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (data.reply) {
+                removeMessage(loadingMessage);
+                addMessage("Bot", data.reply);
+
+                if (data.buttons) {
+                    displayServiceButtons(data.buttons);
+                }
+
+                if (data.audio_url) {
+                    currentAudio = new Audio(data.audio_url);
+                    currentAudio.play();
+                }
+
+                if (data.qr_codes) {
+                    displayQRCodes(data.qr_codes);
+                }
+            }
+        } catch (error) {
+            console.error("Error communicating with the server:", error);
+            removeMessage(loadingMessage);
+            addMessage("Bot", "Error communicating with the server.");
+        }
+
+        document.getElementById("user-input").value = "";
+    });
+
+    function addMessage(sender, message) {
+        const messagesDiv = document.getElementById("messages");
+        const messageDiv = document.createElement("div");
+        messageDiv.classList.add("message", sender === "You" ? "user" : "bot");
+        messageDiv.textContent = message;
+        messagesDiv.appendChild(messageDiv);
+        document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function addLoadingIndicator() {
+        const messagesDiv = document.getElementById("messages");
+        const loadingDiv = document.createElement("div");
+        loadingDiv.classList.add("message", "bot", "loading-indicator");
+        loadingDiv.textContent = ".....";
+        messagesDiv.appendChild(loadingDiv);
+        document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+        return loadingDiv;
+    }
+
+    function removeMessage(messageElement) {
+        if (messageElement && messageElement.parentNode) {
+            messageElement.parentNode.removeChild(messageElement);
+        }
+    }
+
+    function clearServiceButtons() {
+        const buttonsDiv = document.querySelector(".service-buttons");
+        if (buttonsDiv) {
+            buttonsDiv.remove();
+        }
+    }
+
+    function displayServiceButtons(buttons) {
+        clearServiceButtons();
+
+        const chatContainer = document.getElementById("chat-container");
+        const buttonsDiv = document.createElement("div");
+        buttonsDiv.classList.add("service-buttons");
+
+        buttons.forEach((button) => {
+            const buttonElement = document.createElement("button");
+            buttonElement.classList.add("service-button");
+            buttonElement.textContent = button.title;
+
+            // Handle "Confirm" button
+            if (button.payload === "confirm") {
+                buttonElement.onclick = async (e) => {
+                    e.preventDefault();
+                    stopCurrentAudio(); // Stop current audio playback
+                    const response = await fetch("/chat/send_message/", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": getCookie("csrftoken"),
+                        },
+                        body: JSON.stringify({
+                            message: button.payload,
+                            language: selectedLanguage,
+                        }),
+                    });
+
+                    const data = await response.json();
+
+                    if (data.reply) {
+                        addMessage("Bot", data.reply);
+                        if (data.buttons) {
+                            displayServiceButtons(data.buttons);
+                        }
+                    }
+                };
+            }
+            // Handle "Pay Now" button
+            else if (button.payload === "pay_now") {
+                buttonElement.onclick = async (e) => {
+                    e.preventDefault();
+                    stopCurrentAudio(); // Stop current audio playback
+
+                    try {
+                        const response = await fetch("/chat/send_message/", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "X-CSRFToken": getCookie("csrftoken"),
+                            },
+                            body: JSON.stringify({
+                                message: button.payload,
+                                language: selectedLanguage,
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (data.payment_url) {
+                            // Open the payment page in a new tab
+                            window.open(data.payment_url, "_blank");
+
+                            // Poll for payment status after payment is complete
+                            setTimeout(async () => {
+                                const verifyResponse = await fetch("/chat/send_message/", {
+                                    method: "POST",
+                                    headers: {
+                                        "Content-Type": "application/json",
+                                        "X-CSRFToken": getCookie("csrftoken"),
+                                    },
+                                    body: JSON.stringify({
+                                        message: "payment_successful",
+                                        language: selectedLanguage,
+                                    }),
+                                });
+
+                                const verifyData = await verifyResponse.json();
+                                if (verifyData.reply) {
+                                    addMessage("Bot", verifyData.reply);
+
+                                    // If QR codes are included in the response, display them
+                                    if (verifyData.reply_type === "qr_codes" && verifyData.qr_codes) {
+                                        displayQRCodes(verifyData.qr_codes);
+                                    }
+                                }
+                            }, 5000); // Wait 5 seconds before checking
+                        } else {
+                            addMessage("Bot", "Payment initiation failed.");
+                        }
+                    } catch (error) {
+                        console.error("Error initiating payment:", error);
+                        addMessage("Bot", "Error initiating payment.");
+                    }
+                };
+            }
+
+
+            // Handle other buttons
+            else {
+                buttonElement.onclick = (e) => {
+                    e.preventDefault();
+                    const userInput = document.getElementById("user-input");
+                    userInput.value = button.payload;
+                    clearServiceButtons();
+                    stopCurrentAudio(); // Stop current audio playback
+                    document.getElementById("chat-form").dispatchEvent(new Event("submit"));
+                };
+            }
+
+            buttonsDiv.appendChild(buttonElement);
+        });
+
+        chatContainer.appendChild(buttonsDiv);
+    }
+
+    function displayQRCodes(qrCodes) {
+        const messagesDiv = document.getElementById("messages");
+
+        qrCodes.forEach((qrCodeObj, index) => {
+            const qrContainer = document.createElement("div");
+            qrContainer.classList.add("message", "bot");
+
+            const qrText = document.createElement("p");
+            qrText.textContent = `Here is your ${qrCodeObj.age_category} QR code:`;
+
+            const qrImage = document.createElement("img");
+            qrImage.src = qrCodeObj.qr_code_url;
+            qrImage.alt = `QR Code ${index + 1}`;
+            qrImage.style.width = "150px";
+            qrImage.style.height = "150px";
+
+            qrContainer.appendChild(qrText);
+            qrContainer.appendChild(qrImage);
+            messagesDiv.appendChild(qrContainer);
+
+            document.getElementById("chat-container").scrollTop = messagesDiv.scrollHeight;
+        });
+    }
+
+
+
+
+    function stopCurrentAudio() {
+        if (currentAudio) {
+            currentAudio.pause();
+            currentAudio.currentTime = 0;
+            currentAudio = null;
+        }
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split("; ").reduce((acc, cookie) => {
+            const [key, val] = cookie.split("=");
+            acc[key] = decodeURIComponent(val);
+            return acc;
+        }, {});
+        return cookies[name];
+    }
+});
+
+</script>
+
+
+
+{% endblock content %}

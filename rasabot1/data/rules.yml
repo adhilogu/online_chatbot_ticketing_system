@@ -1,0 +1,44 @@
+version: "3.1"
+
+rules:
+  - rule: Greet user
+    steps:
+      - intent: greet
+      - action: utter_greet
+
+  - rule: Ask for services
+    steps:
+      - intent: ask_services
+      - action: utter_services
+
+  - rule: Provide ticket type - ask nationality
+    steps:
+      - intent: choose_ticket_type
+      - slot_was_set:
+          - ticket_type: null
+      - action: utter_ask_nationality
+
+  - rule: Provide nationality - ask for adult count
+    steps:
+      - intent: provide_nationality
+      - slot_was_set:
+          - nationality: null
+      - action: utter_ask_adult_count
+
+  - rule: Provide adult count - ask for children count
+    steps:
+      - intent: provide_tickets
+        entities:
+          - adult_count: null
+      - slot_was_set:
+          - adult_count: null
+      - action: utter_ask_children_count
+
+  - rule: Provide children count - confirm booking
+    steps:
+      - intent: provide_tickets
+        entities:
+          - children_count: null
+      - slot_was_set:
+          - children_count: null
+      - action: utter_thankyou
