@@ -13,6 +13,8 @@ django-soft-ui-design/.env
 django-soft-ui-design/env.sample
 django-soft-ui-design/render.yaml
 django-soft-ui-design/LICENSE.md
+django-soft-ui-design/nginx
+
 # Django stuff
 django-soft-ui-design/*.log
 django-soft-ui-design/db.sqlite3
