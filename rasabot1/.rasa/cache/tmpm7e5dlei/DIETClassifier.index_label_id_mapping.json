@@ -1,0 +1,12 @@
+{
+  "0": "ask_services",
+  "1": "book_ticket",
+  "2": "choose_ticket_type",
+  "3": "confirm_booking",
+  "4": "greet",
+  "5": "inquire_services",
+  "6": "inquire_ticket_type",
+  "7": "provide_nationality",
+  "8": "provide_tickets",
+  "9": "thankyou"
+}
