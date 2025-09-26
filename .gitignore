@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.venv/
+venv/
+
+# Environment variables
+django-soft-ui-design/.env
+django-soft-ui-design/env.sample
+django-soft-ui-design/render.yaml
+
+# Django stuff
+django-soft-ui-design/*.log
+django-soft-ui-design/db.sqlite3
+django-soft-ui-design/staticfiles/
+
+# IDE / Editor
+.idea/
+.vscode/
+
+# Scripts
+build.sh
+
+# OS files
+.DS_Store
+Thumbs.db
