@@ -2,7 +2,7 @@
 **Developed for Smart India Hackathon (SIH) 2024 – Ministry of Culture**
 
 <div style="float: right; margin-left: 20px;">
-  <img src="git-images/gd.png" alt="Smart GD Platform" width="200" />
+  <img src="git-images/cb.png" alt="Smart GD Platform" width="200" />
 </div>
 
 The **Online Chatbot Ticket Booking System** for Museums is an AI-driven web application designed to simplify the museum ticketing experience through a conversational interface. Developed under the **Ministry of Culture** problem statement for **Smart India Hackathon 2024**, this solution eliminates long queues, minimizes paper usage, and enhances accessibility for visitors across India.
