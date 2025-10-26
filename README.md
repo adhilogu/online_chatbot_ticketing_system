@@ -134,7 +134,7 @@ List of all the shows and transcations(admin panel)
 ## Demo
 
 <div style="text-align: left;">
-  <img src="git-images/chatbot_ticket.gif" alt="Demo Video" style="width: 190px;height:300px; margin: 10px 0;">
+  <img src="git-images/chatbot_ticket.gif" alt="Demo Video" style="width: 240px;height:350px; margin: 10px 0;">
 </div>
 
 ---
