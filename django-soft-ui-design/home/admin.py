@@ -347,7 +347,7 @@ class TicketAdmin(admin.ModelAdmin):
         "nationality",
         'user',
         "adult_count",  # Replaced age_category with adult_count
-        "child_count",  # Added child_count
+        "child_count",
         "total_count",  # Added total_count
         "transaction_id",
         "transaction_at",

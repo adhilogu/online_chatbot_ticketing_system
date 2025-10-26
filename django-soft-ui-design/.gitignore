@@ -3,5 +3,5 @@ build.sh
 docker-compose.yml
 Dockerfile
 LICENSE.md
-
+render.yaml
 Thumbs.db

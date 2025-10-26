@@ -33,7 +33,7 @@ class Ticket(models.Model):
 
     # Removed AGE_CATEGORY_CHOICES as per your request
 
-    session_id = models.CharField(max_length=400, editable=False)
+    session_id = models.CharField(max_length=400, editable=True)
     user = models.CharField(max_length=400, editable=False)
     nationality = models.CharField(max_length=20, choices=SESSION_NATIONALITY_CHOICES)
     adult_count = models.PositiveIntegerField(default=0)  # Number of adults
