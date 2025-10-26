@@ -131,8 +131,12 @@ Admin Panel
 List of all the shows and transcations(admin panel)
 
 ---
-Demo
-![Demo Video](git-images/chatbot_ticket.gif)
+## Demo
+
+<div style="text-align: left;">
+  <img src="git-images/chatbot_ticket.gif" alt="Demo Video" style="width: 190px;height:300px; margin: 10px 0;">
+</div>
+
 ---
 ## 📧 Support
 For assistance with the **Smart Group Discussion Platform**, contact us:
