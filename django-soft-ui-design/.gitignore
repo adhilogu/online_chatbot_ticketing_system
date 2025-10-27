@@ -5,4 +5,4 @@ Dockerfile
 LICENSE.md
 render.yaml
 Thumbs.db
-nginx
+nginx/
